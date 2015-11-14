@@ -1,17 +1,6 @@
 'use strict';
 
 exports.init = function () {
-    Object.defineProperty(Object.prototype, 'namespace', {
-        writable: false,
-        value: helperMethods()
-    });
-
-    Object.defineProperty(Object.prototype, 'wrap', {
-        value: 
-    });
-};
-
-function helperMethods() {
     Object.defineProperty(Object.prototype, 'checkContainsKeys', {
         writable: false,
         value: function (keys) {
@@ -108,7 +97,7 @@ function helperMethods() {
             return this.split(' ').length === count;
         }
     });
-}
+};
 
 function incorrectType(prototypeOfObject, correctPrototypes) {
     return correctPrototypes.indexOf(prototypeOfObject) === -1;
