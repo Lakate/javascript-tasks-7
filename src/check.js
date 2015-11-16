@@ -1,35 +1,46 @@
 'use strict';
+var METHODS_FOR = {
+    object: ['containsKeys', 'hasKeys', 'containsValues', 'hasValues', 'hasValueType'],
+    array: ['containsKeys', 'hasKeys', 'containsValues', 'hasValues', 'hasValueType', 'hasLength'],
+    function: ['hasParamsCount'],
+    string: ['hasLength', 'hasWordsCount']
+};
 
+/**
+ * Метод, расширяющий прототип Object.prototype.
+ */
 exports.init = function () {
-    Object.defineProperty(Object.prototype, 'checkContainsKeys', {
-        writable: false,
-        value: function (keys) {
-            if (incorrectType(Object.getPrototypeOf(this), [Array.prototype, Object.prototype])) {
-                return throwError(typeof (this), 'checkContainsKeys');
-            }
+    Object.defineProperty(Object.prototype, 'check', {
+        get: function() {
+            /** Получаем вспомогательные методы */
+            var helperMethods = getHelperMethods();
+            /** Получаем тип объекта */
+            var typeOfObject = getType.call(this);
+            METHODS_FOR[typeOfObject].forEach(function (method) {
+                helperMethods[method] = helperMethods[method].bind(this);
+            }, this);
+            return helperMethods
+        }
+    });
+};
+
+/**
+ *  Возвращает вспомогательные функции
+ */
+function getHelperMethods() {
+    return {
+        containsKeys: function (keys) {
             var objectKeys = Object.keys(this);
             return keys.every(function (key) {
                 return objectKeys.indexOf(key) !== -1;
             });
-        }
-    });
+        },
 
-    Object.defineProperty(Object.prototype, 'checkHasKeys', {
-        writable: false,
-        value: function (keys) {
-            if (incorrectType(Object.getPrototypeOf(this), [Array.prototype, Object.prototype])) {
-                return throwError(typeof (this), 'checkHasKeys');
-            }
-            return Object.keys(this).length === keys.length && this.checkContainsKeys(keys);
-        }
-    });
+        hasKeys: function (keys) {
+            return Object.keys(this).length === keys.length && this.check.containsKeys(keys);
+        },
 
-    Object.defineProperty(Object.prototype, 'checkContainsValues', {
-        writable: false,
-        value: function (keys) {
-            if (incorrectType(Object.getPrototypeOf(this), [Array.prototype, Object.prototype])) {
-                return throwError(typeof (this), 'checkContainsValues');
-            }
+        containsValues: function (keys) {
             var cb = function (key) {
                 return this[key];
             };
@@ -37,25 +48,13 @@ exports.init = function () {
             return keys.every(function (key) {
                 return objectValues.indexOf(key) !== -1;
             });
-        }
-    });
+        },
 
-    Object.defineProperty(Object.prototype, 'checkHasValues', {
-        writable: false,
-        value: function (keys) {
-            if (incorrectType(Object.getPrototypeOf(this), [Array.prototype, Object.prototype])) {
-                return throwError(typeof (this), 'checkHasValues');
-            }
-            return Object.keys(this).length === keys.length && this.checkContainsValues(keys);
-        }
-    });
+        hasValues: function (keys) {
+            return Object.keys(this).length === keys.length && this.check.containsValues(keys);
+        },
 
-    Object.defineProperty(Object.prototype, 'checkHasValueType', {
-        writable: false,
-        value: function (key, type) {
-            if (incorrectType(Object.getPrototypeOf(this), [Array.prototype, Object.prototype])) {
-                return throwError(typeof (this), 'checkHasValueType');
-            }
+        hasValueType: function (key, type) {
             if ([String, Number, Function, Array].indexOf(type) === -1) {
                 return 'ERROR! Wrong type!';
             }
@@ -63,46 +62,34 @@ exports.init = function () {
                 return 'ERROR! Wrong field!';
             }
             return this[key] === type(this[key]);
-        }
-    });
+        },
 
-    Object.defineProperty(Object.prototype, 'checkHasLength', {
-        writable: false,
-        value: function (length) {
-            if (!(typeof (this) === 'string') &&
-                incorrectType(Object.getPrototypeOf(this), [Array.prototype, String.prototype])) {
-                return throwError(typeof (this), 'checkHasLength');
-            }
+        hasLength: function (length) {
             return this.length === length;
-        }
-    });
+        },
 
-    Object.defineProperty(Object.prototype, 'checkHasParamsCount', {
-        writable: false,
-        value: function (length) {
-            if (incorrectType(Object.getPrototypeOf(this), [Function.prototype])) {
-                return throwError(typeof (this), 'checkHasParamsCount');
-            }
+        hasParamsCount: function (length) {
             return this.length === length;
-        }
-    });
+        },
 
-    Object.defineProperty(Object.prototype, 'checkHasWordsCount', {
-        writable: false,
-        value: function (count) {
-            if (!(typeof (this) === 'string') &&
-                incorrectType(Object.getPrototypeOf(this), [String.prototype])) {
-                return throwError(typeof (this), 'checkHasWordsCount');
-            }
+        hasWordsCount: function (count) {
             return this.split(' ').length === count;
         }
-    });
-};
-
-function incorrectType(prototypeOfObject, correctPrototypes) {
-    return correctPrototypes.indexOf(prototypeOfObject) === -1;
+    }
 }
 
-function throwError(typeOfObject, property) {
-    return 'ERROR!' + typeOfObject + ' has not \'' + property + '\' property';
+/**
+ * Возвращает тип объекта
+ * @returns {string}
+ */
+function getType() {
+    if (typeof(this) === 'string') {
+        return 'string';
+    }
+    switch (Object.getPrototypeOf(this)) {
+        case Array.prototype: return 'array';
+        case Function.prototype: return 'function';
+        case String.prototype: return 'string';
+    }
+    return 'object';
 }
