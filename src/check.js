@@ -11,7 +11,7 @@ METHODS_FOR.array = METHODS_FOR.object.concat(['hasLength']);
  */
 exports.init = function () {
     Object.defineProperty(Object.prototype, 'check', {
-        get: function() {
+        get: function () {
             /** Получаем вспомогательные методы */
             var helperMethods = getHelperMethods();
             /** Получаем тип объекта */
@@ -19,7 +19,7 @@ exports.init = function () {
             METHODS_FOR[typeOfObject].forEach(function (method) {
                 helperMethods[method] = helperMethods[method].bind(this);
             }, this);
-            return helperMethods
+            return helperMethods;
         },
         configurable: true
     });
@@ -76,7 +76,7 @@ function getHelperMethods() {
         hasWordsCount: function (count) {
             return this.split(' ').length === count;
         }
-    }
+    };
 }
 
 /**
@@ -84,7 +84,7 @@ function getHelperMethods() {
  * @returns {string}
  */
 function getType() {
-    if (typeof(this) === 'string') {
+    if (typeof (this) === 'string') {
         return 'string';
     }
     switch (Object.getPrototypeOf(this)) {
