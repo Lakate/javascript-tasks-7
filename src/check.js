@@ -1,10 +1,10 @@
 'use strict';
 var METHODS_FOR = {
     object: ['containsKeys', 'hasKeys', 'containsValues', 'hasValues', 'hasValueType'],
-    array: ['containsKeys', 'hasKeys', 'containsValues', 'hasValues', 'hasValueType', 'hasLength'],
     function: ['hasParamsCount'],
     string: ['hasLength', 'hasWordsCount']
 };
+METHODS_FOR.array = METHODS_FOR.object.concat(['hasLength']);
 
 /**
  * Метод, расширяющий прототип Object.prototype.
@@ -20,7 +20,8 @@ exports.init = function () {
                 helperMethods[method] = helperMethods[method].bind(this);
             }, this);
             return helperMethods
-        }
+        },
+        configurable: true
     });
 };
 
