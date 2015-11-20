@@ -71,6 +71,7 @@ exports.wrap = function (obj) {
 function getHelperMethods() {
     return {
         containsKeys: function () {
+            isCorrectArguments(arguments);
             var args = [].slice.call(arguments, -2);
             var typeOfProperty = args[0];
             var keys = args[1];
@@ -86,6 +87,7 @@ function getHelperMethods() {
         },
 
         containsValues: function () {
+            isCorrectArguments(arguments);
             var args = [].slice.call(arguments, -2);
             var typeOfProperty = args[0];
             var values = args[1];
@@ -110,7 +112,13 @@ function getHelperMethods() {
             if (!this.hasOwnProperty(key)) {
                 return 'ERROR! Wrong field!';
             }
-            return getAnswer(typeOfProperty, areEqual(this[key], type(this[key])));
+            switch (type) {
+                case String: return getAnswer(typeOfProperty, typeof this[key] === 'string');
+                break;
+                case Number: return getAnswer(typeOfProperty, typeof this[key] === 'number');
+                break;
+                default: return getAnswer(typeOfProperty, this[key] instanceof type);
+            }
         },
 
         hasLength: function (typeOfProperty, length) {
@@ -158,4 +166,10 @@ function getAnswer(typeOfProperty, answer) {
         return answer;
     }
     return !answer;
+}
+
+function isCorrectArguments(args) {
+    if (args.length > 4) {
+        throw new RangeError('Error! Wrong arguments!');
+    }
 }
